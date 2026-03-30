@@ -1,0 +1,22 @@
+# sbt
+target/
+project/target/
+project/project/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.bsp/
+
+# Play
+logs/
+RUNNING_PID
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

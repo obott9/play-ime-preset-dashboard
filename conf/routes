@@ -1,0 +1,20 @@
+# Routes — Scala version
+# https://www.playframework.com/documentation/3.0.x/ScalaRouting
+
+# Preset CRUD
+GET     /api/presets                 controllers.PresetController.list(page: Int ?= 0, size: Int ?= 20, defaultOnly: Boolean ?= false)
+GET     /api/presets/popular         controllers.PresetController.popular(limit: Int ?= 10)
+GET     /api/presets/shared/:code    controllers.PresetController.getByShareCode(code: String)
+GET     /api/presets/:id             controllers.PresetController.get(id: java.util.UUID)
+POST    /api/presets                 controllers.PresetController.create()
+PUT     /api/presets/:id             controllers.PresetController.update(id: java.util.UUID)
+DELETE  /api/presets/:id             controllers.PresetController.delete(id: java.util.UUID)
+
+# Like
+POST    /api/presets/:id/like        controllers.PresetController.toggleLike(id: java.util.UUID)
+
+# Streaming (Pekko Streams)
+GET     /api/presets/stream          controllers.PresetController.streamPresets()
+
+# Health check
+GET     /api/health                  controllers.PresetController.health()
