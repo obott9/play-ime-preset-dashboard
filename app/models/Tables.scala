@@ -1,52 +1,57 @@
 package models
 
 import slick.jdbc.PostgresProfile.api._
-import java.time.OffsetDateTime
+import java.sql.Timestamp
+import java.time.{OffsetDateTime, ZoneOffset}
 import java.util.UUID
 import play.api.libs.json._
 
 /**
  * Slick table definitions for IME preset database.
- *
- * Maps to existing Supabase PostgreSQL tables: presets, likes.
- * Uses functional, type-safe query composition.
  */
 
-// --- Case Classes (immutable data models) ---
+// --- Case Classes ---
 
 case class Preset(
   id: UUID,
   userId: Option[UUID],
   name: String,
-  settings: String, // JSONB stored as String
+  settings: String,
   shareCode: Option[String],
   likesCount: Int = 0,
   isDefault: Boolean = false,
-  createdAt: Option[OffsetDateTime] = None,
-  updatedAt: Option[OffsetDateTime] = None
-)
+  createdAt: Option[Timestamp] = None,
+  updatedAt: Option[Timestamp] = None
+) {
+  def createdAtOffset: Option[OffsetDateTime] = createdAt.map(_.toInstant.atOffset(ZoneOffset.UTC))
+  def updatedAtOffset: Option[OffsetDateTime] = updatedAt.map(_.toInstant.atOffset(ZoneOffset.UTC))
+}
 
 case class Like(
   id: UUID,
   userId: UUID,
   presetId: UUID,
-  createdAt: Option[OffsetDateTime] = None
+  createdAt: Option[Timestamp] = None
 )
 
 // --- JSON Formats ---
 
 object Preset {
+  implicit val timestampWrites: Writes[Timestamp] = (ts: Timestamp) =>
+    JsString(ts.toInstant.atOffset(ZoneOffset.UTC).toString)
+  implicit val timestampReads: Reads[Timestamp] = (json: JsValue) =>
+    json.validate[String].map(s => Timestamp.from(OffsetDateTime.parse(s).toInstant))
   implicit val format: OFormat[Preset] = Json.format[Preset]
 }
 
 object Like {
+  import Preset.{timestampWrites, timestampReads}
   implicit val format: OFormat[Like] = Json.format[Like]
 }
 
 // --- Slick Table Mappings ---
 
 class PresetsTable(tag: Tag) extends Table[Preset](tag, "presets") {
-
   def id         = column[UUID]("id", O.PrimaryKey)
   def userId     = column[Option[UUID]]("user_id")
   def name       = column[String]("name")
@@ -54,8 +59,8 @@ class PresetsTable(tag: Tag) extends Table[Preset](tag, "presets") {
   def shareCode  = column[Option[String]]("share_code")
   def likesCount = column[Int]("likes_count", O.Default(0))
   def isDefault  = column[Boolean]("is_default", O.Default(false))
-  def createdAt  = column[Option[OffsetDateTime]]("created_at")
-  def updatedAt  = column[Option[OffsetDateTime]]("updated_at")
+  def createdAt  = column[Option[Timestamp]]("created_at")
+  def updatedAt  = column[Option[Timestamp]]("updated_at")
 
   def * = (id, userId, name, settings, shareCode, likesCount, isDefault, createdAt, updatedAt).mapTo[Preset]
 
@@ -65,11 +70,10 @@ class PresetsTable(tag: Tag) extends Table[Preset](tag, "presets") {
 }
 
 class LikesTable(tag: Tag) extends Table[Like](tag, "likes") {
-
   def id        = column[UUID]("id", O.PrimaryKey)
   def userId    = column[UUID]("user_id")
   def presetId  = column[UUID]("preset_id")
-  def createdAt = column[Option[OffsetDateTime]]("created_at")
+  def createdAt = column[Option[Timestamp]]("created_at")
 
   def * = (id, userId, presetId, createdAt).mapTo[Like]
 

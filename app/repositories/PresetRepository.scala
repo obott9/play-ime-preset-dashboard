@@ -9,6 +9,7 @@ import slick.jdbc.PostgresProfile.api._
 
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
+import slick.basic.DatabasePublisher
 import play.api.Logging
 
 /**
