@@ -98,4 +98,5 @@ If you find this project useful:
 
 [![GitHub Stars](https://img.shields.io/github/stars/obott9/play-ime-preset-dashboard?style=social)](https://github.com/obott9/play-ime-preset-dashboard)
 [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa)](https://github.com/sponsors/obott9)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-F16061)](https://ko-fi.com/obott9)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-yellow)](https://buymeacoffee.com/obott9)
