@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IME Preset Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh}
+header{background:#161b22;border-bottom:1px solid #30363d;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:18px;color:#e6edf3;font-weight:600}
+header .info{font-size:11px;background:#30363d;color:#8b949e;padding:3px 8px;border-radius:12px}
+main{max-width:100%;margin:0 auto;padding:24px;overflow-x:auto}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.btn{padding:8px 16px;border:1px solid #30363d;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s ease}
+.btn-primary{background:#238636;color:#fff;border-color:#238636}.btn-primary:hover{background:#2ea043}
+.btn-secondary{background:#21262d;color:#c9d1d9}.btn-secondary:hover{background:#30363d}
+.btn-danger{background:#da3633;color:#fff;border-color:#da3633}.btn-danger:hover{background:#f85149}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+/* Table */
+table{width:100%;border-collapse:collapse;background:#161b22;border:1px solid #30363d;border-radius:8px;overflow:hidden;font-size:12px}
+thead{background:#1c2128}
+th{text-align:left;padding:8px 10px;font-size:11px;color:#8b949e;font-weight:600;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid #30363d;white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid #21262d;color:#c9d1d9;vertical-align:top}
+tr:hover td{background:#1c2128}
+tr:last-child td{border-bottom:none}
+.mono{font-family:'SF Mono',Monaco,Menlo,monospace;font-size:11px;color:#8b949e}
+.id-cell{max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}.id-cell:hover{color:#58a6ff}
+.settings-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;color:#8b949e}.settings-cell:hover{color:#58a6ff;text-decoration:underline}
+.badge-true{background:#238636;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px}
+.badge-false{background:#30363d;color:#8b949e;font-size:10px;padding:2px 6px;border-radius:10px}
+.actions-cell{display:flex;gap:4px;white-space:nowrap}
+.likes{color:#f0883e;font-weight:600}
+.pagination{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:16px;font-size:13px;color:#8b949e}
+/* Overlay base */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;justify-content:center;align-items:flex-start;padding-top:3vh;overflow-y:auto}
+.overlay.active{display:flex}
+.panel{background:#161b22;border:1px solid #30363d;border-radius:12px;width:95%;margin-bottom:5vh}
+.panel-header{padding:14px 20px;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center}
+.panel-header h2{font-size:16px;color:#e6edf3}
+.panel-close{background:none;border:none;color:#8b949e;font-size:20px;cursor:pointer}.panel-close:hover{color:#e6edf3}
+.panel-body{padding:20px}
+.panel-footer{padding:14px 20px;border-top:1px solid #30363d;display:flex;justify-content:flex-end;gap:8px}
+/* Form */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.form-group{margin-bottom:10px}
+.form-group.full{grid-column:1/-1}
+.form-group label{display:block;font-size:11px;color:#8b949e;margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:7px 10px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:13px;font-family:inherit}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:#58a6ff}
+.form-group textarea{font-family:'SF Mono',Monaco,Menlo,monospace;font-size:12px;line-height:1.5;resize:vertical}
+.form-group input[type="checkbox"]{width:auto}
+.form-group .hint{font-size:10px;color:#484f58;margin-top:2px}
+/* Color input */
+.color-field{display:flex;align-items:center;gap:8px}
+.color-field input[type="color"]{width:36px;height:30px;border:1px solid #30363d;border-radius:4px;background:#0d1117;cursor:pointer;padding:2px}
+.color-field input[type="text"]{flex:1}
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:1px solid #30363d;margin-bottom:16px}
+.tab{padding:10px 18px;font-size:13px;font-weight:500;color:#8b949e;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:#c9d1d9}
+.tab.active{color:#58a6ff;border-bottom-color:#58a6ff}
+.tab-content{display:none}.tab-content.active{display:block}
+/* Section */
+.section{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:16px;margin-bottom:14px}
+.section-title{font-size:13px;font-weight:600;color:#e6edf3;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title span{font-size:16px}
+/* Lang table */
+.lang-table{width:100%;border-collapse:collapse}
+.lang-table th{text-align:left;padding:6px 8px;font-size:11px;color:#8b949e;border-bottom:1px solid #30363d}
+.lang-table td{padding:4px 8px}
+.lang-table input[type="text"]{padding:5px 8px;font-size:12px}
+.lang-table input[type="color"]{width:30px;height:26px}
+/* Preview */
+.preview-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.preview-swatch{width:24px;height:24px;border-radius:4px;border:1px solid #30363d}
+/* Toast */
+.toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 16px;border-radius:6px;font-size:13px;animation:slideIn .3s ease-out;max-width:400px}
+.toast-success{background:#238636;color:#fff}.toast-error{background:#da3633;color:#fff}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+/* Confirm */
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;justify-content:center;align-items:center}
+.confirm-overlay.active{display:flex}
+.confirm-box{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;max-width:420px;text-align:center}
+.confirm-box p{margin-bottom:16px;font-size:14px}.confirm-box .actions-cell{justify-content:center}
+.empty{text-align:center;padding:40px;color:#484f58;font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <h1>IME Preset Admin</h1>
+  <span class="info" id="server-info">Loading...</span>
+</header>
+<main>
+  <div class="toolbar">
+    <div>
+      <button class="btn btn-primary" onclick="openCreateModal()">+ New Preset</button>
+      <button class="btn btn-secondary" onclick="loadPresets()" style="margin-left:8px">Refresh</button>
+    </div>
+    <span id="count-info" style="font-size:12px;color:#8b949e"></span>
+  </div>
+  <table>
+    <thead><tr>
+      <th>ID</th><th>User ID</th><th>Name</th><th>Settings</th><th>Share Code</th><th>Likes</th><th>Default</th><th>Created</th><th>Updated</th><th>Actions</th>
+    </tr></thead>
+    <tbody id="table-body"><tr><td colspan="10" class="empty">Loading...</td></tr></tbody>
+  </table>
+  <div class="pagination" id="pagination"></div>
+</main>
+
+<div class="toast-container" id="toasts"></div>
+
+<!-- ==================== Edit/Create Modal ==================== -->
+<div class="overlay" id="modal">
+  <div class="panel" style="max-width:900px">
+    <div class="panel-header">
+      <h2 id="modal-title">New Preset</h2>
+      <button class="panel-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="panel-body">
+      <form id="preset-form" onsubmit="handleSubmit(event)">
+        <input type="hidden" id="f-id">
+
+        <!-- Meta fields -->
+        <div class="section">
+          <div class="section-title"><span>📋</span> Preset Info</div>
+          <div class="form-row">
+            <div class="form-group"><label>Name *</label><input type="text" id="f-name" required></div>
+            <div class="form-group"><label>Share Code</label><input type="text" id="f-shareCode" placeholder="Auto-generated"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>User ID</label><input type="text" id="f-userId" placeholder="UUID (optional)"></div>
+            <div class="form-group"><label>Default Preset</label>
+              <div style="padding:7px 0"><label style="font-size:13px;color:#c9d1d9;text-transform:none;letter-spacing:0;cursor:pointer"><input type="checkbox" id="f-isDefault"> Mark as default</label></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings tabs -->
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('clock')">Clock</div>
+          <div class="tab" onclick="switchTab('indicator')">Indicator</div>
+          <div class="tab" onclick="switchTab('json')">Raw JSON</div>
+        </div>
+
+        <!-- Clock tab -->
+        <div class="tab-content active" id="tab-clock">
+          <div class="section">
+            <div class="section-title"><span>🕐</span> Clock Settings</div>
+            <div class="form-row-3">
+              <div class="form-group"><label>Mode</label>
+                <select id="s-clock-mode"><option value="analog">Analog</option><option value="digital">Digital</option></select>
+              </div>
+              <div class="form-group"><label>Font</label><input type="text" id="s-clock-font" value="system-ui"></div>
+              <div class="form-group"><label>Font Size</label><input type="number" id="s-clock-fontSize" min="8" max="200"></div>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group"><label>Window Width</label><input type="number" id="s-clock-windowWidth" min="100" max="1000"></div>
+              <div class="form-group"><label>Window Height</label><input type="number" id="s-clock-windowHeight" min="100" max="1000"></div>
+              <div class="form-group"><label>Analog Clock Size</label><input type="number" id="s-clock-analogClockSize" min="50" max="800"></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span>🎨</span> Colors</div>
+            <div class="form-row">
+              <div class="form-group"><label>BG Color ON (IME active)</label><div class="color-field"><input type="color" id="s-clock-bgColorOn" value="#ff2600"><input type="text" id="s-clock-bgColorOn-text" oninput="syncColor(this,'s-clock-bgColorOn')"></div></div>
+              <div class="form-group"><label>BG Color OFF (IME inactive)</label><div class="color-field"><input type="color" id="s-clock-bgColorOff" value="#0096ff"><input type="text" id="s-clock-bgColorOff-text" oninput="syncColor(this,'s-clock-bgColorOff')"></div></div>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group"><label>Text Color</label><div class="color-field"><input type="color" id="s-clock-textColor" value="#ffffff"><input type="text" id="s-clock-textColor-text" oninput="syncColor(this,'s-clock-textColor')"></div></div>
+              <div class="form-group"><label>Analog Color</label><div class="color-field"><input type="color" id="s-clock-analogColor" value="#fffc00"><input type="text" id="s-clock-analogColor-text" oninput="syncColor(this,'s-clock-analogColor')"></div></div>
+              <div class="form-group"><label>BG Opacity</label><input type="range" id="s-clock-bgOpacity" min="0" max="100" oninput="this.nextElementSibling.textContent=this.value+'%'"><span style="font-size:12px;color:#8b949e;margin-left:4px">60%</span></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span>📅</span> Date/Time Format</div>
+            <div class="form-row">
+              <div class="form-group"><label>Date Style</label>
+                <select id="s-clock-dateFormatStyle"><option value="complete">Complete</option><option value="abbreviated">Abbreviated</option><option value="custom1">Custom 1</option><option value="custom2">Custom 2</option></select>
+              </div>
+              <div class="form-group"><label>Time Style</label>
+                <select id="s-clock-timeFormatStyle"><option value="standard">Standard</option><option value="complete">Complete</option><option value="custom1">Custom 1</option><option value="custom2">Custom 2</option></select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Position</label>
+                <select id="s-clock-dateTimePosition"><option value="dateTimeVertical">Date/Time Vertical</option><option value="timeDateVertical">Time/Date Vertical</option></select>
+              </div>
+              <div class="form-group"><label>Show Seconds</label>
+                <div style="padding:7px 0"><label style="font-size:13px;color:#c9d1d9;text-transform:none;letter-spacing:0;cursor:pointer"><input type="checkbox" id="s-clock-showSeconds" checked> Show seconds hand/digit</label></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Custom Date 1</label><input type="text" id="s-clock-customDateFormat1" placeholder="yyyy/MM/dd E"></div>
+              <div class="form-group"><label>Custom Date 2</label><input type="text" id="s-clock-customDateFormat2" placeholder="M/d (EEE)"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Custom Time 1</label><input type="text" id="s-clock-customTimeFormat1" placeholder="HH:mm:ss"></div>
+              <div class="form-group"><label>Custom Time 2</label><input type="text" id="s-clock-customTimeFormat2" placeholder="H:mm"></div>
+            </div>
+            <div class="form-group"><label>Use Indicator Colors</label>
+              <div style="padding:4px 0"><label style="font-size:13px;color:#c9d1d9;text-transform:none;letter-spacing:0;cursor:pointer"><input type="checkbox" id="s-clock-useIndicatorColors" checked> Apply indicator colors to clock background</label></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Indicator tab -->
+        <div class="tab-content" id="tab-indicator">
+          <div class="section">
+            <div class="section-title"><span>🔤</span> Indicator Settings</div>
+            <div class="form-row-3">
+              <div class="form-group"><label>Size</label><input type="number" id="s-ind-size" min="10" max="200"></div>
+              <div class="form-group"><label>Opacity</label><input type="range" id="s-ind-opacity" min="0" max="100" oninput="this.nextElementSibling.textContent=this.value+'%'"><span style="font-size:12px;color:#8b949e">100%</span></div>
+              <div class="form-group"><label>Font Size Ratio</label><input type="number" id="s-ind-fontSizeRatio" min="0.1" max="1.0" step="0.1"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Position X</label><input type="number" id="s-ind-posX" min="0" max="100"></div>
+              <div class="form-group"><label>Position Y</label><input type="number" id="s-ind-posY" min="0" max="100"></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span>🌐</span> Language Texts &amp; Colors</div>
+            <table class="lang-table">
+              <thead><tr><th>Language</th><th>Display Text</th><th>Color</th><th></th></tr></thead>
+              <tbody id="lang-table-body"></tbody>
+            </table>
+            <div style="margin-top:8px">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="addLangRow()">+ Add Language</button>
+            </div>
+            <div class="preview-row" id="lang-preview"></div>
+          </div>
+        </div>
+
+        <!-- Raw JSON tab -->
+        <div class="tab-content" id="tab-json">
+          <div class="section">
+            <div class="section-title"><span>{ }</span> Raw JSON</div>
+            <div class="form-group full">
+              <textarea id="f-settings-raw" style="min-height:350px" placeholder='{"clock":{...},"indicator":{...}}'></textarea>
+              <div class="hint">Direct JSON edit. Changes here override visual editor values when saving from this tab.</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('preset-form').requestSubmit()" id="submit-btn">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm -->
+<div class="confirm-overlay" id="confirm">
+  <div class="confirm-box">
+    <p id="confirm-msg">Are you sure?</p>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Viewer -->
+<div class="overlay" id="settings-viewer">
+  <div class="panel" style="max-width:700px">
+    <div class="panel-header"><h2 id="sv-title">Settings</h2><button class="panel-close" onclick="closeSV()">&times;</button></div>
+    <pre style="padding:20px;font-family:'SF Mono',Monaco,Menlo,monospace;font-size:12px;line-height:1.5;color:#c9d1d9;overflow:auto;max-height:70vh" id="sv-content"></pre>
+  </div>
+</div>
+
+<script>
+// ==================== State ====================
+let currentPage = 0, PAGE_SIZE = 20, presetsCache = [], activeTab = 'clock', langRows = [];
+
+// ==================== API ====================
+async function api(path, opts = {}) {
+  const res = await fetch('/api' + path, { headers: {'Content-Type':'application/json','Accept':'application/json'}, ...opts });
+  const text = await res.text();
+  if (!res.ok) { let m = res.status+' '+res.statusText; try{const j=JSON.parse(text);m=j.error||j.message||m}catch{} throw new Error(m); }
+  return text ? JSON.parse(text) : null;
+}
+
+// ==================== Load ====================
+async function loadPresets() {
+  try {
+    const d = await api(`/presets?page=${currentPage}&size=${PAGE_SIZE}`);
+    presetsCache = d.data || [];
+    renderTable(presetsCache);
+    renderPagination(d.page, d.totalPages);
+    document.getElementById('count-info').textContent = d.totalCount + ' presets';
+  } catch(e) { toast('Load failed: '+e.message,'error'); }
+}
+async function loadHealth() {
+  try {
+    const h = await api('/health');
+    const p = [h.framework]; if(h.language) p.push(h.language); if(h.java) p.push('Java '+h.java);
+    document.getElementById('server-info').textContent = p.join(' | ');
+  } catch { document.getElementById('server-info').textContent = 'Disconnected'; }
+}
+
+// ==================== Table ====================
+const fmtDate = d => { if(!d) return '-'; const dt=new Date(d); return dt.toLocaleDateString()+' '+dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); };
+const shortId = id => id ? id.substring(0,8)+'...' : '-';
+function settingsPreview(s) {
+  try { const o=JSON.parse(s); return `${o.clock?.mode||'?'} | ind:${o.indicator?.size||'?'}`; } catch { return (s||'').substring(0,20)+'...'; }
+}
+
+function renderTable(list) {
+  const tb = document.getElementById('table-body');
+  if(!list.length){ tb.innerHTML='<tr><td colspan="10" class="empty">No presets</td></tr>'; return; }
+  tb.innerHTML = list.map((p,i) => {
+    const def = p.isDefault??p.default??false;
+    return `<tr>
+      <td class="mono id-cell" title="${esc(p.id)}" onclick="copyText('${esc(p.id)}')">${shortId(p.id)}</td>
+      <td class="mono id-cell" title="${esc(p.userId||'')}" onclick="copyText('${esc(p.userId||'')}')">${p.userId?shortId(p.userId):'<span style="color:#484f58">null</span>'}</td>
+      <td><strong>${esc(p.name)}</strong></td>
+      <td class="mono settings-cell" onclick="viewSettings(${i})">${settingsPreview(p.settings)}</td>
+      <td class="mono" style="color:#58a6ff">${esc(p.shareCode||'-')}</td>
+      <td class="likes">${p.likesCount??0}</td>
+      <td>${def?'<span class="badge-true">Yes</span>':'<span class="badge-false">No</span>'}</td>
+      <td class="mono" style="white-space:nowrap">${fmtDate(p.createdAt)}</td>
+      <td class="mono" style="white-space:nowrap">${fmtDate(p.updatedAt)}</td>
+      <td><div class="actions-cell">
+        <button class="btn btn-secondary btn-sm" onclick="openEditModal('${p.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('${p.id}','${esc(p.name)}')" ${def?'disabled title="Cannot delete default"':''}>Del</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function renderPagination(page, total) {
+  const d = document.getElementById('pagination');
+  if(total<=1){ d.innerHTML=''; return; }
+  d.innerHTML = `<button class="btn btn-secondary btn-sm" ${page===0?'disabled':''} onclick="goPage(${page-1})">Prev</button>
+    <span>Page ${page+1}/${total}</span>
+    <button class="btn btn-secondary btn-sm" ${page>=total-1?'disabled':''} onclick="goPage(${page+1})">Next</button>`;
+}
+function goPage(p){ currentPage=p; loadPresets(); }
+
+// ==================== Settings Viewer ====================
+function viewSettings(i) {
+  const p = presetsCache[i]; if(!p) return;
+  document.getElementById('sv-title').textContent = 'Settings: ' + p.name;
+  try { document.getElementById('sv-content').textContent = JSON.stringify(JSON.parse(p.settings),null,2); } catch { document.getElementById('sv-content').textContent = p.settings; }
+  document.getElementById('settings-viewer').classList.add('active');
+}
+function closeSV(){ document.getElementById('settings-viewer').classList.remove('active'); }
+
+// ==================== Tabs ====================
+function switchTab(name) {
+  activeTab = name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.textContent.toLowerCase().includes(name === 'json' ? 'raw' : name)));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-'+name));
+  if (name === 'json') syncFormToJson();
+}
+
+// ==================== Color sync ====================
+function syncColorPicker(id) {
+  const c = document.getElementById(id);
+  const t = document.getElementById(id+'-text');
+  if(c && t) { t.value = c.value; c.addEventListener('input', ()=>{ t.value=c.value; }); t.addEventListener('input', ()=>{ if(/^#[0-9a-f]{6}$/i.test(t.value)) c.value=t.value; }); }
+}
+function syncColor(textEl, colorId) { const c=document.getElementById(colorId); if(c && /^#[0-9a-f]{6}$/i.test(textEl.value)) c.value=textEl.value; }
+const colorFields = ['bgColorOn','bgColorOff','textColor','analogColor'];
+
+// ==================== Language rows ====================
+function renderLangRows() {
+  const tb = document.getElementById('lang-table-body');
+  tb.innerHTML = langRows.map((r,i) => `<tr>
+    <td><input type="text" value="${esc(r.key)}" onchange="langRows[${i}].key=this.value" style="width:80px" placeholder="en"></td>
+    <td><input type="text" value="${esc(r.text)}" onchange="langRows[${i}].text=this.value" style="width:60px" placeholder="A"></td>
+    <td><div class="color-field"><input type="color" value="${r.color}" onchange="langRows[${i}].color=this.value"><input type="text" value="${r.color}" style="width:80px" onchange="langRows[${i}].color=this.value"></div></td>
+    <td><button type="button" class="btn btn-danger btn-sm" onclick="langRows.splice(${i},1);renderLangRows()">x</button></td>
+  </tr>`).join('');
+}
+function addLangRow() { langRows.push({key:'',text:'',color:'#3498db'}); renderLangRows(); }
+
+// ==================== Form <-> Settings ====================
+const defaultSettings = {
+  clock:{font:"system-ui",mode:"analog",fontSize:24,bgColorOn:"#ff2600",bgOpacity:60,textColor:"#ffffff",bgColorOff:"#0096ff",analogColor:"#fffc00",showSeconds:true,windowWidth:320,windowHeight:220,analogClockSize:200,dateFormatStyle:"complete",timeFormatStyle:"standard",dateTimePosition:"dateTimeVertical",customDateFormat1:"yyyy/MM/dd E",customDateFormat2:"M/d (EEE)",customTimeFormat1:"HH:mm:ss",customTimeFormat2:"H:mm",useIndicatorColors:true},
+  indicator:{size:40,texts:{en:"A",ja:"\u3042",ko:"\ud55c","zh-Hans":"\u7b80","zh-Hant":"\u7e41"},colors:{en:"#3498db",ja:"#e74c3c",ko:"#9b59b6","zh-Hans":"#2ecc71","zh-Hant":"#a8e063"},opacity:100,position:{x:90,y:10},fontSizeRatio:0.5}
+};
+
+function populateForm(settings) {
+  const s = settings || defaultSettings;
+  const c = s.clock || {};
+  const ind = s.indicator || {};
+  // Clock
+  document.getElementById('s-clock-mode').value = c.mode || 'analog';
+  document.getElementById('s-clock-font').value = c.font || 'system-ui';
+  document.getElementById('s-clock-fontSize').value = c.fontSize || 24;
+  document.getElementById('s-clock-windowWidth').value = c.windowWidth || 320;
+  document.getElementById('s-clock-windowHeight').value = c.windowHeight || 220;
+  document.getElementById('s-clock-analogClockSize').value = c.analogClockSize || 200;
+  colorFields.forEach(f => {
+    const el = document.getElementById('s-clock-'+f);
+    const tel = document.getElementById('s-clock-'+f+'-text');
+    if(el) el.value = c[f] || '#000000';
+    if(tel) tel.value = c[f] || '#000000';
+  });
+  const op = document.getElementById('s-clock-bgOpacity');
+  op.value = c.bgOpacity ?? 60; op.nextElementSibling.textContent = op.value+'%';
+  document.getElementById('s-clock-dateFormatStyle').value = c.dateFormatStyle || 'complete';
+  document.getElementById('s-clock-timeFormatStyle').value = c.timeFormatStyle || 'standard';
+  document.getElementById('s-clock-dateTimePosition').value = c.dateTimePosition || 'dateTimeVertical';
+  document.getElementById('s-clock-showSeconds').checked = c.showSeconds !== false;
+  document.getElementById('s-clock-useIndicatorColors').checked = c.useIndicatorColors !== false;
+  document.getElementById('s-clock-customDateFormat1').value = c.customDateFormat1 || '';
+  document.getElementById('s-clock-customDateFormat2').value = c.customDateFormat2 || '';
+  document.getElementById('s-clock-customTimeFormat1').value = c.customTimeFormat1 || '';
+  document.getElementById('s-clock-customTimeFormat2').value = c.customTimeFormat2 || '';
+  // Indicator
+  document.getElementById('s-ind-size').value = ind.size || 40;
+  const iop = document.getElementById('s-ind-opacity');
+  iop.value = ind.opacity ?? 100; iop.nextElementSibling.textContent = iop.value+'%';
+  document.getElementById('s-ind-fontSizeRatio').value = ind.fontSizeRatio || 0.5;
+  document.getElementById('s-ind-posX').value = ind.position?.x ?? 90;
+  document.getElementById('s-ind-posY').value = ind.position?.y ?? 10;
+  // Languages
+  const texts = ind.texts || {};
+  const colors = ind.colors || {};
+  const keys = [...new Set([...Object.keys(texts), ...Object.keys(colors)])];
+  langRows = keys.map(k => ({key:k, text:texts[k]||'', color:colors[k]||'#3498db'}));
+  renderLangRows();
+  // Raw JSON
+  document.getElementById('f-settings-raw').value = JSON.stringify(s, null, 2);
+}
+
+function collectSettings() {
+  const c = {
+    font: document.getElementById('s-clock-font').value,
+    mode: document.getElementById('s-clock-mode').value,
+    fontSize: +document.getElementById('s-clock-fontSize').value,
+    bgColorOn: document.getElementById('s-clock-bgColorOn').value,
+    bgOpacity: +document.getElementById('s-clock-bgOpacity').value,
+    textColor: document.getElementById('s-clock-textColor').value,
+    bgColorOff: document.getElementById('s-clock-bgColorOff').value,
+    analogColor: document.getElementById('s-clock-analogColor').value,
+    showSeconds: document.getElementById('s-clock-showSeconds').checked,
+    windowWidth: +document.getElementById('s-clock-windowWidth').value,
+    windowHeight: +document.getElementById('s-clock-windowHeight').value,
+    analogClockSize: +document.getElementById('s-clock-analogClockSize').value,
+    dateFormatStyle: document.getElementById('s-clock-dateFormatStyle').value,
+    timeFormatStyle: document.getElementById('s-clock-timeFormatStyle').value,
+    dateTimePosition: document.getElementById('s-clock-dateTimePosition').value,
+    customDateFormat1: document.getElementById('s-clock-customDateFormat1').value,
+    customDateFormat2: document.getElementById('s-clock-customDateFormat2').value,
+    customTimeFormat1: document.getElementById('s-clock-customTimeFormat1').value,
+    customTimeFormat2: document.getElementById('s-clock-customTimeFormat2').value,
+    useIndicatorColors: document.getElementById('s-clock-useIndicatorColors').checked,
+  };
+  const texts = {}, colors = {};
+  langRows.forEach(r => { if(r.key) { texts[r.key]=r.text; colors[r.key]=r.color; }});
+  const ind = {
+    size: +document.getElementById('s-ind-size').value,
+    texts, colors,
+    opacity: +document.getElementById('s-ind-opacity').value,
+    position: { x: +document.getElementById('s-ind-posX').value, y: +document.getElementById('s-ind-posY').value },
+    fontSizeRatio: +document.getElementById('s-ind-fontSizeRatio').value,
+  };
+  return { clock: c, indicator: ind };
+}
+
+function syncFormToJson() {
+  document.getElementById('f-settings-raw').value = JSON.stringify(collectSettings(), null, 2);
+}
+
+// ==================== Modal Open/Close ====================
+function openCreateModal() {
+  document.getElementById('modal-title').textContent = 'New Preset';
+  document.getElementById('submit-btn').textContent = 'Create';
+  document.getElementById('f-id').value = '';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-userId').value = '';
+  document.getElementById('f-shareCode').value = '';
+  document.getElementById('f-isDefault').checked = false;
+  populateForm(defaultSettings);
+  switchTab('clock');
+  document.getElementById('modal').classList.add('active');
+  document.getElementById('f-name').focus();
+}
+
+function openEditModal(id) {
+  const p = presetsCache.find(x => x.id === id); if(!p) return;
+  document.getElementById('modal-title').textContent = 'Edit: ' + p.name;
+  document.getElementById('submit-btn').textContent = 'Save';
+  document.getElementById('f-id').value = p.id;
+  document.getElementById('f-name').value = p.name;
+  document.getElementById('f-userId').value = p.userId || '';
+  document.getElementById('f-shareCode').value = p.shareCode || '';
+  document.getElementById('f-isDefault').checked = p.isDefault ?? p.default ?? false;
+  let settings; try { settings = JSON.parse(p.settings); } catch { settings = defaultSettings; }
+  populateForm(settings);
+  switchTab('clock');
+  document.getElementById('modal').classList.add('active');
+  document.getElementById('f-name').focus();
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('active'); }
+
+// ==================== Submit ====================
+async function handleSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('f-id').value;
+  const name = document.getElementById('f-name').value.trim();
+  if(!name) { toast('Name is required','error'); return; }
+  let settingsStr;
+  if (activeTab === 'json') {
+    const raw = document.getElementById('f-settings-raw').value.trim();
+    try { JSON.parse(raw); settingsStr = raw; } catch { toast('Invalid JSON in Raw tab','error'); return; }
+  } else {
+    settingsStr = JSON.stringify(collectSettings());
+  }
+  const body = {
+    name, settings: settingsStr,
+    user_id: document.getElementById('f-userId').value.trim() || null,
+    share_code: document.getElementById('f-shareCode').value.trim() || null,
+    is_default: document.getElementById('f-isDefault').checked,
+  };
+  try {
+    if(id) { await api('/presets/'+id, {method:'PUT',body:JSON.stringify(body)}); toast('Updated: '+name,'success'); }
+    else { await api('/presets', {method:'POST',body:JSON.stringify(body)}); toast('Created: '+name,'success'); }
+    closeModal(); loadPresets();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+// ==================== Delete ====================
+let delId = null;
+function confirmDelete(id, name) { delId=id; document.getElementById('confirm-msg').textContent=`Delete "${name}"? This cannot be undone.`; document.getElementById('confirm').classList.add('active'); document.getElementById('confirm-delete-btn').onclick=doDelete; }
+function closeConfirm() { document.getElementById('confirm').classList.remove('active'); delId=null; }
+async function doDelete() { if(!delId) return; try { await api('/presets/'+delId,{method:'DELETE'}); toast('Deleted','success'); closeConfirm(); loadPresets(); } catch(e) { toast(e.message,'error'); closeConfirm(); } }
+
+// ==================== Toast / Util ====================
+function toast(msg, type='success') { const c=document.getElementById('toasts'),t=document.createElement('div'); t.className='toast toast-'+type; t.textContent=msg; c.appendChild(t); setTimeout(()=>t.remove(),3500); }
+function esc(s) { if(!s) return ''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function copyText(s) { if(s) { navigator.clipboard.writeText(s); toast('Copied: '+s,'success'); } }
+
+// ==================== Keyboard ====================
+document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeModal(); closeConfirm(); closeSV(); } });
+
+// ==================== Init ====================
+document.addEventListener('DOMContentLoaded', () => {
+  loadHealth(); loadPresets();
+  colorFields.forEach(f => syncColorPicker('s-clock-'+f));
+});
+</script>
+</body>
+</html>

@@ -1,16 +1,25 @@
 # Routes — Scala version
 # https://www.playframework.com/documentation/3.0.x/ScalaRouting
 
+# Admin UI
+GET     /                            controllers.Assets.at(path="/public", file="admin.html")
+GET     /admin                       controllers.Assets.at(path="/public", file="admin.html")
+GET     /assets/*file                controllers.Assets.versioned(path="/public", file: Asset)
+
 # Preset CRUD
 GET     /api/presets                 controllers.PresetController.list(page: Int ?= 0, size: Int ?= 20, defaultOnly: Boolean ?= false)
 GET     /api/presets/popular         controllers.PresetController.popular(limit: Int ?= 10)
 GET     /api/presets/shared/:code    controllers.PresetController.getByShareCode(code: String)
 GET     /api/presets/:id             controllers.PresetController.get(id: java.util.UUID)
++ nocsrf
 POST    /api/presets                 controllers.PresetController.create()
++ nocsrf
 PUT     /api/presets/:id             controllers.PresetController.update(id: java.util.UUID)
++ nocsrf
 DELETE  /api/presets/:id             controllers.PresetController.delete(id: java.util.UUID)
 
 # Like
++ nocsrf
 POST    /api/presets/:id/like        controllers.PresetController.toggleLike(id: java.util.UUID)
 
 # Streaming (Pekko Streams)

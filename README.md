@@ -1,22 +1,54 @@
+[English](README.md) | [日本語](README_ja.md)
+
 # Play IME Preset Dashboard (Scala)
 
 A reactive REST API server for managing IME indicator clock presets, built with **Play Framework 3.0** and **Scala 2.13**.
 
-Connects to a Supabase PostgreSQL database (same schema as [IME Simulator](https://obott9.github.io/ime-simulator/)). Demonstrates functional programming patterns, type-safe queries, and Pekko Streams for reactive data delivery.
+Connects to a Supabase PostgreSQL database (same schema as [IME Simulator](https://obott9.github.io/ime-simulator/)). Demonstrates functional programming patterns, type-safe queries, and Pekko Streams for reactive data delivery. Includes a built-in admin dashboard for browser-based data management.
+
+## Screenshots
+
+| Admin Dashboard | Indicator Editor |
+|:---:|:---:|
+| ![Admin Dashboard](docs/images/admin_list.png) | ![Indicator Editor](docs/images/admin_edit_indicator.png) |
 
 ## Tech Stack
 
-- **Play Framework 3.0.10** (Pekko-based)
-- **Scala 2.13**
-- **Slick 3.5** (Functional Relational Mapping)
-- **Pekko Streams** (Reactive streaming)
-- **PostgreSQL** (Supabase)
-- **sbt** (Build tool)
+| Component | Technology |
+|-----------|-----------|
+| Framework | [Play Framework 3.0.10](https://www.playframework.com/) (Pekko-based) |
+| Language | Scala 2.13 |
+| Database Access | [Slick 3.5](https://scala-slick.org/) (Functional Relational Mapping) |
+| Streaming | [Pekko Streams](https://pekko.apache.org/) (Reactive streaming) |
+| Database | PostgreSQL ([Supabase](https://supabase.com/)) |
+| Build | sbt 1.10 |
+
+## Features
+
+- **Full CRUD** — Create, read, update, delete presets via REST API
+- **Admin Dashboard** — Browser-based UI at `/admin` with visual settings editor (color pickers, sliders, per-language indicator config)
+- **SSE Streaming** — Real-time preset delivery via Server-Sent Events (Pekko Streams)
+- **Pagination** — Configurable page size with total count
+- **Share Codes** — Unique codes for preset sharing
+- **Like System** — Toggle likes with user tracking
+- **Popular Presets** — Ranked by like count
+- **Health Check** — Server status endpoint
+
+## Key Scala Patterns
+
+- **Immutable case classes** for data models
+- **Option/Either** for functional error handling (no exceptions)
+- **Future-based** async composition
+- **Slick FRM** — type-safe, composable database queries
+- **Pekko Streams** — backpressure-aware reactive streaming via SSE
+- **Pattern matching** for request validation and routing
+- **Repository pattern** — clean separation of database access from controllers
 
 ## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
+| `GET` | `/admin` | Admin dashboard (browser UI) |
 | `GET` | `/api/presets` | List presets (paginated) |
 | `GET` | `/api/presets/:id` | Get preset by ID |
 | `POST` | `/api/presets` | Create preset |
@@ -27,15 +59,6 @@ Connects to a Supabase PostgreSQL database (same schema as [IME Simulator](https
 | `GET` | `/api/presets/popular` | Popular presets |
 | `GET` | `/api/presets/stream` | SSE stream (Pekko Streams) |
 | `GET` | `/api/health` | Health check |
-
-## Key Scala Features Demonstrated
-
-- **Immutable case classes** for data models
-- **Option/Either** for functional error handling (no exceptions)
-- **Future-based** async composition
-- **Slick FRM** — type-safe, composable database queries
-- **Pekko Streams** — backpressure-aware reactive streaming via SSE
-- **Pattern matching** for request validation and routing
 
 ## Setup
 
@@ -51,13 +74,11 @@ Connects to a Supabase PostgreSQL database (same schema as [IME Simulator](https
 
 ### 2. Configure Environment
 
-Copy `.env.example` to `.env` and fill in your Supabase credentials:
-
 ```bash
 cp .env.example .env
 ```
 
-To find your credentials:
+To find your Supabase credentials:
 1. Open your Supabase project dashboard
 2. Click **Connect** (top bar)
 3. Select **Direct** tab > **Session pooler**
@@ -70,33 +91,62 @@ To find your credentials:
 export $(cat .env | xargs) && sbt run
 ```
 
-Server starts at `http://localhost:9000`.
+Open `http://localhost:9000/admin` in your browser.
 
-### Example Requests
+### Example API Requests
 
 ```bash
 # Health check
 curl http://localhost:9000/api/health
 
-# List presets
+# List presets (paginated)
 curl http://localhost:9000/api/presets
 
 # Stream presets (Server-Sent Events)
-curl http://localhost:9000/api/presets/stream
+curl -N http://localhost:9000/api/presets/stream
 
-# Popular presets
-curl http://localhost:9000/api/presets/popular?limit=5
+# Popular presets (top 5)
+curl "http://localhost:9000/api/presets/popular?limit=5"
 ```
 
-## Java Version
+## Project Structure
 
-See [play-ime-preset-api](https://github.com/obott9/play-ime-preset-api) for the Java 21 + Ebean ORM version.
+```
+app/
+  controllers/
+    PresetController.scala   # REST API endpoints + SSE streaming
+  models/
+    Tables.scala             # Slick table definitions (Preset, Like)
+  repositories/
+    PresetRepository.scala   # Database access layer (Slick queries)
+conf/
+  application.conf           # Play + Slick + CORS config
+  routes                     # URL routing
+public/
+  admin.html                 # Admin dashboard (single-file SPA)
+```
+
+## Related Projects
+
+| Project | Description |
+|---------|-------------|
+| [play-ime-preset-api](https://github.com/obott9/play-ime-preset-api) | Same API in **Java 21** + Ebean ORM |
+| [IME Simulator](https://github.com/obott9/ime-simulator) | React frontend that consumes this API |
+| [IMEIndicatorClock](https://github.com/obott9/IMEIndicatorClock) | macOS desktop app that uses these presets |
+| [IMEIndicatorClockW](https://github.com/obott9/IMEIndicatorClockW) | Windows desktop app that uses these presets |
+
+## Note
+
+The admin dashboard is for **local development and demonstration only**. It provides unrestricted access to all data without authentication. For production use, the [IME Simulator](https://github.com/obott9/ime-simulator) frontend implements Supabase Auth with ownership-based access control.
+
+## License
+
+[MIT](LICENSE)
 
 ## Support
 
 If you find this project useful:
 
-[![GitHub Stars](https://img.shields.io/github/stars/obott9/play-ime-preset-dashboard?style=social)](https://github.com/obott9/play-ime-preset-dashboard)
 [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa)](https://github.com/sponsors/obott9)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-F16061)](https://ko-fi.com/obott9)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-yellow)](https://buymeacoffee.com/obott9)
