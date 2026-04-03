@@ -1,10 +1,10 @@
 package models
 
-import slick.jdbc.PostgresProfile.api._
+import slick.jdbc.PostgresProfile.api.*
 import java.sql.Timestamp
 import java.time.{OffsetDateTime, ZoneOffset}
 import java.util.UUID
-import play.api.libs.json._
+import play.api.libs.json.*
 
 /**
  * Slick table definitions for IME preset database.
@@ -37,16 +37,16 @@ case class Like(
 // --- JSON Formats ---
 
 object Preset {
-  implicit val timestampWrites: Writes[Timestamp] = (ts: Timestamp) =>
+  given Writes[Timestamp] = (ts: Timestamp) =>
     JsString(ts.toInstant.atOffset(ZoneOffset.UTC).toString)
-  implicit val timestampReads: Reads[Timestamp] = (json: JsValue) =>
+  given Reads[Timestamp] = (json: JsValue) =>
     json.validate[String].map(s => Timestamp.from(OffsetDateTime.parse(s).toInstant))
-  implicit val format: OFormat[Preset] = Json.format[Preset]
+  given OFormat[Preset] = Json.format[Preset]
 }
 
 object Like {
-  import Preset.{timestampWrites, timestampReads}
-  implicit val format: OFormat[Like] = Json.format[Like]
+  import Preset.given
+  given OFormat[Like] = Json.format[Like]
 }
 
 // --- Slick Table Mappings ---

@@ -1,10 +1,10 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-import models._
+import models.*
 import repositories.PresetRepository
-import play.api.libs.json._
-import play.api.mvc._
+import play.api.libs.json.*
+import play.api.mvc.*
 
 import org.apache.pekko.stream.scaladsl.Source
 import org.apache.pekko.util.ByteString
@@ -27,7 +27,7 @@ import play.api.Logging
 class PresetController @Inject()(
   cc: ControllerComponents,
   repository: PresetRepository
-)(implicit ec: ExecutionContext) extends AbstractController(cc) with Logging {
+)(using ec: ExecutionContext) extends AbstractController(cc) with Logging {
 
   // ========== CRUD ==========
 
@@ -187,7 +187,7 @@ class PresetController @Inject()(
     Ok(Json.obj(
       "status"    -> "ok",
       "framework" -> "Play Framework 3.0.10",
-      "language"  -> "Scala 2.13",
+      "language"  -> "Scala 3",
       "java"      -> System.getProperty("java.version")
     ))
   }

@@ -2,7 +2,7 @@
 
 # Play IME Preset Dashboard (Scala)
 
-A reactive REST API server for managing IME indicator clock presets, built with **Play Framework 3.0** and **Scala 2.13**.
+A reactive REST API server for managing IME indicator clock presets, built with **Play Framework 3.0** and **Scala 3**.
 
 Connects to a Supabase PostgreSQL database (same schema as [IME Simulator](https://obott9.github.io/ime-simulator/)). Demonstrates functional programming patterns, type-safe queries, and Pekko Streams for reactive data delivery. Includes a built-in admin dashboard for browser-based data management.
 
@@ -17,7 +17,7 @@ Connects to a Supabase PostgreSQL database (same schema as [IME Simulator](https
 | Component | Technology |
 |-----------|-----------|
 | Framework | [Play Framework 3.0.10](https://www.playframework.com/) (Pekko-based) |
-| Language | Scala 2.13 |
+| Language | Scala 3 |
 | Database Access | [Slick 3.5](https://scala-slick.org/) (Functional Relational Mapping) |
 | Streaming | [Pekko Streams](https://pekko.apache.org/) (Reactive streaming) |
 | Database | PostgreSQL ([Supabase](https://supabase.com/)) |

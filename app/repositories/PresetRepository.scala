@@ -1,11 +1,11 @@
 package repositories
 
 import javax.inject.{Inject, Singleton}
-import models._
-import models.Tables._
+import models.*
+import models.Tables.*
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
-import slick.jdbc.PostgresProfile.api._
+import slick.jdbc.PostgresProfile.api.*
 
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
@@ -23,10 +23,10 @@ import play.api.Logging
 @Singleton
 class PresetRepository @Inject()(
   dbConfigProvider: DatabaseConfigProvider
-)(implicit ec: ExecutionContext) extends Logging {
+)(using ec: ExecutionContext) extends Logging {
 
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
-  import dbConfig._
+  import dbConfig.*
 
   // ========== Read Operations ==========
 

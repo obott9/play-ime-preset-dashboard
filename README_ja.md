@@ -2,7 +2,7 @@
 
 # Play IME Preset Dashboard (Scala)
 
-**Play Framework 3.0** と **Scala 2.13** で構築した、IMEインジケータ時計プリセット管理用リアクティブREST APIサーバー。
+**Play Framework 3.0** と **Scala 3** で構築した、IMEインジケータ時計プリセット管理用リアクティブREST APIサーバー。
 
 [IME Simulator](https://obott9.github.io/ime-simulator/) と同じスキーマの Supabase PostgreSQL データベースに接続。関数型プログラミングパターン、型安全クエリ、Pekko Streams によるリアクティブデータ配信を実装。ブラウザベースの管理ダッシュボードを内蔵。
 
@@ -17,7 +17,7 @@
 | コンポーネント | 技術 |
 |-----------|-----------|
 | フレームワーク | [Play Framework 3.0.10](https://www.playframework.com/) (Pekko ベース) |
-| 言語 | Scala 2.13 |
+| 言語 | Scala 3 |
 | DB アクセス | [Slick 3.5](https://scala-slick.org/) (Functional Relational Mapping) |
 | ストリーミング | [Pekko Streams](https://pekko.apache.org/) (リアクティブストリーミング) |
 | データベース | PostgreSQL ([Supabase](https://supabase.com/)) |

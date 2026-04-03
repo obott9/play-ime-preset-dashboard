@@ -5,7 +5,7 @@ version := "1.0-SNAPSHOT"
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
 
-scalaVersion := "2.13.18"
+scalaVersion := "3.3.4"
 
 // Play Framework 3.0.10 (Pekko-based) + Slick
 libraryDependencies ++= Seq(
@@ -20,6 +20,5 @@ libraryDependencies ++= Seq(
 // Scala compiler options
 scalacOptions ++= Seq(
   "-feature",
-  "-deprecation",
-  "-Xfatal-warnings"
+  "-Werror"
 )
