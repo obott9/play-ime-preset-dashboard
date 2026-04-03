@@ -139,6 +139,16 @@ public/
 
 The admin dashboard is for **local development and demonstration only**. It provides unrestricted access to all data without authentication. For production use, the [IME Simulator](https://github.com/obott9/ime-simulator) frontend implements Supabase Auth with ownership-based access control.
 
+## Development
+
+This project was developed in collaboration with [Claude AI](https://claude.ai/) by Anthropic.
+
+Claude assisted with:
+- Architecture design and code implementation
+- Scala 3 migration
+- Admin dashboard UI development
+- Documentation and README creation
+
 ## License
 
 [MIT](LICENSE)

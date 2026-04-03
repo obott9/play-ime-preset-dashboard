@@ -123,6 +123,16 @@ public/
 
 管理ダッシュボードは**ローカル開発・デモンストレーション専用**です。認証なしで全データにアクセスできます。本番環境では [IME Simulator](https://github.com/obott9/ime-simulator) フロントエンドが Supabase Auth による所有権ベースのアクセス制御を実装しています。
 
+## 開発
+
+このプロジェクトは Anthropic の [Claude AI](https://claude.ai/) との共同作業で開発されました。
+
+Claudeは以下をサポートしました：
+- アーキテクチャ設計とコード実装
+- Scala 3 移行
+- 管理ダッシュボード UI 開発
+- ドキュメントとREADMEの作成
+
 ## ライセンス
 
 [MIT](LICENSE)
